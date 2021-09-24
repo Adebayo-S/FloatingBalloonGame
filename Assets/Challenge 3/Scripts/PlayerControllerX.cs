@@ -5,9 +5,14 @@ using UnityEngine;
 public class PlayerControllerX : MonoBehaviour
 {
     public bool gameOver;
+    public bool isLowEnough;
 
     public float floatForce = 1;
+    public float bounceForce = 1;
     public float gravityModifier = 0.5f;
+    public float topLimit = 16;
+    public float bottomLimit = 0;
+
     private Rigidbody playerRb;
 
     public ParticleSystem explosionParticle;
@@ -16,7 +21,7 @@ public class PlayerControllerX : MonoBehaviour
     private AudioSource playerAudio;
     public AudioClip moneySound;
     public AudioClip explodeSound;
-
+    public AudioClip bounceSound;
 
     // Start is called before the first frame update
     void Start()
@@ -26,7 +31,7 @@ public class PlayerControllerX : MonoBehaviour
         playerRb = GetComponent<Rigidbody>();
 
         // Apply a small upward force at the start of the game
-        //playerRb.AddForce(Vector3.up * 5, ForceMode.Impulse);
+        playerRb.AddForce(Vector3.up * 2, ForceMode.Impulse);
 
     }
 
@@ -34,9 +39,24 @@ public class PlayerControllerX : MonoBehaviour
     void Update()
     {
         // While space is pressed and player is low enough, float up
-        if (Input.GetKeyDown(KeyCode.Space) && !gameOver)
+        if (Input.GetKeyDown(KeyCode.Space) && isLowEnough)
         {
             playerRb.AddForce(Vector3.up * floatForce, ForceMode.Impulse);
+        }
+
+        if (transform.position.y > topLimit)
+        {
+            isLowEnough = false;
+            // transform.position = new Vector3(0,topLimit,0);
+            // playerRb.AddForce(Vector3.down * bounceForce, ForceMode.Impulse);
+        }
+        else isLowEnough = true;
+
+        if (transform.position.y < bottomLimit)
+        {
+            transform.position = new Vector3(0, bottomLimit, 0);
+            playerRb.AddForce(Vector3.up * bounceForce, ForceMode.Impulse);
+            playerAudio.PlayOneShot(bounceSound, 1.0f);
         }
     }
 
